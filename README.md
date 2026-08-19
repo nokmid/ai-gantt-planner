@@ -9,7 +9,7 @@
 
 - Ссылка на приложение: **https://ai-gantt-planner-delta.vercel.app**
 - Бэкенд (API): **https://ai-gantt-planner-1.onrender.com** — проверка здоровья: `/api/health`
-- Демо-видео/gif: `demo.gif` в корне репозитория
+- Демо-видео/gif: `demo.mp4` в корне репозитория
 - Пример Excel для теста: [`examples/example_tasks.xlsx`](examples/example_tasks.xlsx)
 
 > **Важно про первую загрузку:** бэкенд задеплоен на бесплатном тарифе Render,
