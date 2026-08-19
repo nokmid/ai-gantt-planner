@@ -3,12 +3,20 @@
 Веб-приложение: интерактивная диаграмма Ганта с загрузкой/выгрузкой Excel и
 редактированием плана через чат на естественном языке (ИИ-агент с MCP-инструментами).
 
+Тестовое задание: full-stack разработчик AI-native продукта (React + FastAPI).
 
 ## Демо
 
-- Ссылка на приложение: `<заполнить после деплоя>`
+- Ссылка на приложение: **https://ai-gantt-planner-delta.vercel.app**
+- Бэкенд (API): **https://ai-gantt-planner-1.onrender.com** — проверка здоровья: `/api/health`
 - Демо-видео/gif: `demo.gif` в корне репозитория
 - Пример Excel для теста: [`examples/example_tasks.xlsx`](examples/example_tasks.xlsx)
+
+> **Важно про первую загрузку:** бэкенд задеплоен на бесплатном тарифе Render,
+> который "усыпляет" сервис примерно через 15 минут без запросов. Если
+> диаграмма долго не загружается при первом открытии — это нормально,
+> сервер "просыпается" 30–50 секунд, дальше работает быстро. Для реального
+> продакшена нужен платный тариф без усыпления (см. `docs/roadmap-to-production.md`).
 
 ## Архитектура
 
@@ -37,9 +45,13 @@
 Это и защита от галлюцинаций, и то, что превращает произвольный текстовый
 запрос в контролируемое действие.
 
-Схема инструментов зарегистрирована один раз через `FastMCP` и переиспользуется
-и как MCP-сервер (для совместимости со стандартом), и как источник схемы
-для tool calling через OpenRouter (`backend/app/llm_agent.py`).
+Схема инструментов зарегистрирована один раз в простом реестре `TOOLS`
+(`backend/app/mcp/tools.py`) — имя, описание, JSON Schema аргументов рядом
+с каждой функцией — и переиспользуется как источник схемы для tool calling
+через OpenRouter (`backend/app/llm_agent.py`). Изначально это было сделано
+через библиотеку `mcp`/FastMCP, но она требует Python ≥3.10, а часть машин
+(в т.ч. системный `/usr/bin/python3` на Mac) идёт с 3.9 — поэтому та же идея
+реализована вручную без внешней зависимости, без изменения сути подхода.
 
 ### Слои бэкенда
 
@@ -89,15 +101,16 @@ npm run dev
 
 ## Деплой
 
-**Бэкенд (Render / Fly.io / любая VM):**
-1. Задеплоить `backend/` как Docker-сервис (Dockerfile уже есть) либо как обычный
-   Python-сервис с командой `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-2. Указать переменные окружения: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL`,
-   `CORS_ORIGINS=https://<домен фронтенда>`
+Задеплоено именно так:
+
+**Бэкенд (Render):**
+1. Web Service → Language: Docker → Root Directory: `backend`
+2. Environment Variables: `OPENROUTER_API_KEY`, `OPENROUTER_MODEL=anthropic/claude-sonnet-4.6`, `CORS_ORIGINS=*`
+3. Free tier — единственный нюанс: сервис засыпает без трафика, первый запрос после простоя может занять 30–50 секунд
 
 **Фронтенд (Vercel):**
-1. Импортировать `frontend/` как проект, framework preset — Vite
-2. Переменная окружения `VITE_API_BASE_URL=https://<домен бэкенда>`
+1. Import Project → Framework Preset: Vite (определяется автоматически) → Root Directory: `frontend`
+2. Environment Variables: `VITE_API_BASE_URL=https://ai-gantt-planner-1.onrender.com`
 
 ## Как использовались ИИ-ассистенты при разработке
 
